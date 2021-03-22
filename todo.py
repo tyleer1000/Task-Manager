@@ -7,10 +7,12 @@
 #https://www.pythoncentral.io/how-to-pickle-unpickle-tutorial/
 
 import pickle
+import os.path
+from os import path
 from datetime import date
 import sys
 args = sys.argv
-tasks = []
+
 #creates list of valid commands
 add,remove,list,report,done = "add","remove","list","report","done"
 
@@ -32,6 +34,16 @@ class Task:
         self.completed = completed
 
 
+#list of tasks. This should be generated from the .todo.pickle file if the file has been created by the user
+tasks = []
+#list of complete tasks
+complete_tasks = []
+#checks if the user has created any tasks, and unpickles those tasks and reads them into the task list
+if path.exists(".todo.pickle"):
+    with open(".todo.pickle", "rb") as f:
+        existing_tasks = pickle.load(f)
+        for t in existing_tasks:
+            tasks.append(t)
 
 #Requires user to enter a command
 try:
@@ -42,7 +54,7 @@ except IndexError:
 
 #ensures that the user enters a valid command from the list of possible commands
 if command not in (add,remove,list,report,done):
-    print("Invalid command\n Use {0}/{1}/{2}/{3}/{4}/{5}".format(add,remove,list,report,done))
+    print("Invalid command\n Use {0}/{1}/{2}/{3}/{4}".format(add,remove,list,report,done))
     sys.exit(1)
 #creates a task object with inputted attributes and adds it to a pickled file 
 if command == "add":
@@ -52,40 +64,35 @@ if command == "add":
     t.created = date.today()
     t.due = args[4]
     tasks.append(t)
+    #pickles the new task and appends it to the pickle file
     with open(".todo.pickle", "a") as f:
         pickle.dump(tasks, f)
 
+#removes a task from the task list and re-writes the pickle file
 elif command == "remove":
-    file = open("tasks.txt", "r")
-    tasks = file.readlines()
-    tasks = [task.strip() for task in tasks]
-    task_id = args[2]
-    del tasks[int(task_id)]
+    #removes a task from the task list based on the id # of the task
+    tasks.pop(args[2])
+    #over writes the pickle file with the shortened task list
+    with open(".todo.pickle", "w") as f:
+        pickle.dump(tasks, f)
 
-    file = open("tasks.txt", "w")
-    tasks = [task + "\n" for task in tasks]
-    file.writelines(tasks)
-
-
+#reads the pickle file into a new list and prints out that list for the user to view the existing tasks
 elif command == "list":
-    file = open("tasks.txt", "r")
-    tasks = file.readlines()
-    if len(tasks) == 0:
-        print("there are no tasks!")
-    else:
-        print("|-----{0}----{1}----|".format("title", "content"))
-        tasks = [task.strip() for task in tasks]
-        for task in tasks:
-            title, content = task.split('|')
-            print("{0} {1}".format(title, content))
-            file.close()
+    with open(".todo.pickle", "rb") as f:
+        existing_tasks = pickle.load(f)
+        for t in existing_tasks:
+            print(t)
+
+elif command == "done":
+    #removes a task from the task list based on the id # of the task
+    done_task = tasks.pop(args[2])
+    #appends the task to the completed task list
+    complete_tasks.append(done_task)
+    #over writes the pickle file with the new task list and complete task list
+    with open(".todo.pickle", "w") as f:
+        pickle.dump(tasks, f)
+
+
 else:
     print("invalid command!")
 
-with open(".todo.pickle", "rb") as f:
-    test = pickle.load(f)
-    for t in test:
-        print(t.name)
-
-for t in tasks:
-    print t.id
