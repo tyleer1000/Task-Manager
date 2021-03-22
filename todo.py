@@ -4,13 +4,14 @@
 #https://thewhitetulip.gitbooks.io/build-applications-in-python-the-anti-textbook/content/manuscript/10-task.html
 #https://www.programiz.com/python-programming/class
 #https://gobyexample.com/command-line-arguments#:~:text=Command%2Dline%20arguments%20are%20a,to%20parameterize%20execution%20of%20programs.&text=Args%20provides%20access%20to%20raw,the%20arguments%20to%20the%20program.
+#https://www.pythoncentral.io/how-to-pickle-unpickle-tutorial/
 
 import pickle
 from datetime import date
 import sys
 args = sys.argv
-taskID = 1
 tasks = []
+#creates list of valid commands
 add,remove,list,report,done = "add","remove","list","report","done"
 
 class Task:
@@ -32,26 +33,27 @@ class Task:
 
 
 
-
+#Requires user to enter a command
 try:
     command = args[1]
 except IndexError:
-    print("Invalid arguments!")
+    print("Choose a command!")
     sys.exit(1)
 
+#ensures that the user enters a valid command from the list of possible commands
 if command not in (add,remove,list,report,done):
     print("Invalid command\n Use {0}/{1}/{2}/{3}/{4}/{5}".format(add,remove,list,report,done))
     sys.exit(1)
+#creates a task object with inputted attributes and adds it to a pickled file 
 if command == "add":
     t = Task()
-    t.id = taskID
-    t.name = args[2]
+    t.id = args[2]
+    t.name = args[3]
     t.created = date.today()
-    t.due = args[3]
+    t.due = args[4]
     tasks.append(t)
     with open(".todo.pickle", "a") as f:
         pickle.dump(tasks, f)
-    taskID += 1
 
 elif command == "remove":
     file = open("tasks.txt", "r")
@@ -80,3 +82,10 @@ elif command == "list":
 else:
     print("invalid command!")
 
+with open(".todo.pickle", "rb") as f:
+    test = pickle.load(f)
+    for t in test:
+        print(t.name)
+
+for t in tasks:
+    print t.id
