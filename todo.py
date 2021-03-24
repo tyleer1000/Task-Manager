@@ -31,7 +31,7 @@ class Task:
         self.created = created
         self.due = due
         self.priority = priority
-        self.completed = completed
+        self.completed = completed 
 
 
 #list of tasks. This should be generated from the .todo.pickle file if the file has been created by the user
